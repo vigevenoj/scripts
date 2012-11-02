@@ -5,4 +5,4 @@ _fixhpmeter()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	COMPREPLY=($( compgen -f -X '!*-gc*.log' -- ${cur} ) )
 }
-complete -F _fixhpmeter fixhpmeter.sh
+complete -o default -F _fixhpmeter fixhpmeter.sh
