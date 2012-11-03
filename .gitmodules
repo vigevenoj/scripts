@@ -1,0 +1,3 @@
+[submodule "jinspect"]
+	path = jinspect
+	url = git://gist.github.com/269259.git
