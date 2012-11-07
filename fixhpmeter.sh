@@ -13,9 +13,9 @@ if [[ -t 0 ]]; then
 	if [[ -n $2 ]]; then
 		OUTPUT_FILENAME=$2
 	fi
-	cat -vet $1 | grep -v "\^@" | grep -v "$GREP_STRING" | sed 's/\$//g' > $OUTPUT_FILENAME
+	cat -vet $1 | grep -v "\^@" | grep -v "$GREP_STRING" | sed  -e 's/\$//g' -re 's/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}\+0000: //g' > $OUTPUT_FILENAME
 	echo "Wrote output to $OUTPUT_FILENAME"
 else
 	# default behavior, mostly same as old script
-	cat -vet | grep -v "$GREP_STRING" | sed 's/\$//g'  > $OUTPUT_FILENAME
+	cat -vet | grep -v "$GREP_STRING" | sed 's/\$//g' -re 's/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}\+0000: //g'  > $OUTPUT_FILENAME
 fi
