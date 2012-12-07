@@ -8,6 +8,7 @@ SED_NO_PRINTGCDATESTAMPS="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\
 
 
 SEDFLAG=
+OUTPUT_FILENAME=fixed-gc.vgc
 
 # GNU sed needs -r, BSD sed needs -E
 # Macports' gsed is GNU sed, OS X default sed is BSD, so this test works
@@ -23,7 +24,6 @@ function sedflag () {
 }
 
 function assembleOutputFilename() {
-OUTPUT_FILENAME=fixed-gc.vgc
 RENAME_PATTERN="s/-gc\(.*\).log/\1.vgc/g"
 	if [[ $1 =~ .*-gc*.log ]]; then
 		OUTPUT_FILENAME=`echo $1 | sed "$RENAME_PATTERN"`
@@ -40,5 +40,6 @@ if [[ -t 0 ]]; then # Reading from a terminal
 	echo "Wrote output to $OUTPUT_FILENAME"
 else
 	# default behavior, mostly same as old script
+	echo $OUTPUT_FILENAME
 	cat -vet | grep -v "$GREP_STRING" | sed $SEDFLAG -e 's/\$//g' -e 's/'"$SED_NO_PRINTGCDATESTAMPS"'//g'  > $OUTPUT_FILENAME
 fi
