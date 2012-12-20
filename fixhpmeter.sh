@@ -4,7 +4,7 @@
 # Don't output lines with these strings
 GREP_STRING="Rescan (parallel)\|^:" 
 # SED_NO_PRINTGCDATESTAMPS will strip -XX:+PrintGCDateStamps output from the log. Requires passing -r to GNU sed
-SED_NO_PRINTGCDATESTAMPS="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}\+0000: " 
+SED_NO_PRINTGCDATESTAMPS="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}[-+][0-9]{4}: " 
 
 
 SEDFLAG=
