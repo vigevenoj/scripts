@@ -25,7 +25,7 @@ esac
 
 function assembleOutputFilename() {
 RENAME_PATTERN="s/-gc\(.*\).log/\1.vgc/g"
-if [[ $1 =~ .*-gc*.log ]]; then
+if [[ $1 =~ .*-gc.*log ]]; then
 	OUTPUT_FILENAME=`echo $1 | sed "$RENAME_PATTERN"`
 fi
 if [[ -n $2 ]]; then
