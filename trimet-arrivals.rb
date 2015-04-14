@@ -38,7 +38,7 @@ end
 
 
 def convert_time(time_in)
- return Time.at(time_in/1000).to_datetime
+ return Time.at(time_in/1000).strftime("%I:%M %p")
 end
 
 
@@ -49,7 +49,7 @@ fp = './/' + prefix
 
 namespaces = arrivals_info.collect_namespaces
 
-arrivals_info.xpath('.//location', namespaces).each do |node|
+arrivals_info.xpath('.//xmlns:location', namespaces).each do |node|
   if @stop_list.include?node.attr('locid')
     puts "#{node.attr('locid')} is in stop_list"
     stop_location = node.attr('desc')
@@ -60,14 +60,31 @@ arrivals_info.xpath('.//location', namespaces).each do |node|
 
   isabus = false;
 
-  arrivals_info.xpath('.//arrival', namespaces).each do |arrival|
-    if @route_list.include?arrival.attr('route')
-      print arrival.attr('fullSign')
+  arrivals_info.xpath('.//xmlns:arrival', namespaces).each do |arrival|
+#    puts "checking #{arrival.attr('route')} in #{@route_list}"
+    if @route_list.include?(arrival.attr('route').to_i)
+      puts arrival.attr('fullSign')
       if arrival.attr('status') == 'estimated'
-        print 'Estimated arrival time: ' + conv_time(int(arrival.attr['estimated']))
+        puts 'Estimated arrival time: ' + convert_time(arrival.attr('estimated').to_i)
         isabus = true
+      elsif arrival.attr('status') == 'scheduled'
+        puts 'Scheduled arrival time: ' + convert_time(arrival.attr('scheduled').to_i)
+        isabus = true
+      elsif arrival.attr('status') == 'delayed'
+        puts 'This vehicle is delayed; arrival time not known'
+        isabus = true
+      elsif arrival.attr('status') == 'cancelled'
+        puts 'This service has been cancelled'
+        isabus = true # but why? should probably not be true: you're walking
       end
+
+#      if arrival.attr('detour') == 'true'
+#        puts "Detours in effect on route #{arrival.attr('route')}"
+#      end
     end
   end
-
+  
+#  if not isabus
+#    puts 'No upcoming arrivals scheduled.'
+#  end
 end
