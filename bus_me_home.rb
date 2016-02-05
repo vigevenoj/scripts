@@ -5,9 +5,15 @@
 # Configuration file should be named .bus_me_home.yaml in the same directory
 # as this script.
 # Required configuration elements are 
-# a host, port, ssl?, ca_cert?, username, and password for mqtt
-# a valid Trimet App ID
-# an array containing a latitude, longitude
+# * mqtt broker
+# ** host
+# ** port
+# ** ssl?
+# ** ca_cert? 
+# ** username
+# ** password
+# * a valid Trimet App ID
+# * an array containing a latitude, and a longitude
 #
 # Author:: Jacob Vigeveno
 # Copyright:: Copyright (c) 2016
@@ -20,8 +26,6 @@ require 'uri'
 require 'nokogiri'
 require 'yaml'
 require 'bigdecimal'
-
-# a handy set of test lat/long coords: 45.522351, -122.680826
 
 class BusMeHome
   Version = '0.0.1'
