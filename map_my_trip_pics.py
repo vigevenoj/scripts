@@ -42,10 +42,6 @@ class PhotoGPS(object):
     def __init__(self, path):
         self._path = path
         self._dict = {}
-        self._keys = ['GPS GPSLongitude',
-                      'GPS GPSLatitude',
-                      'GPS GPSLatitudeRef',
-                      'GPS GPSLongitudeRef']
         self._gps = None
         self._tags = None
     @property
