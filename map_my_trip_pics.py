@@ -13,9 +13,9 @@ PIC_EXTS = ['.jpg', '.jpeg', '.png']
 class GPS(object):
     def __init__(self, tags):
         self._refs = {'latitude':
-                        1 if tags['GPS GPSLatitudeRef'] == 'N' else -1,
+                        1 if str(tags['GPS GPSLatitudeRef']) == 'N' else -1,
                       'longitude':
-                        1 if tags['GPS GPSLongitudeRef'] == 'E' else -1}
+                        1 if str(tags['GPS GPSLongitudeRef']) == 'E' else -1}
         self._rawlatitude = tags['GPS GPSLatitude']
         self._rawlongitude = tags['GPS GPSLongitude']
         self._latlong = collections.defaultdict(lambda: None)
