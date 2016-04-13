@@ -32,8 +32,8 @@ class GPS(object):
     def _compute(self):
         for i, j in {'latitude': self._rawlatitude,
                   'longitude': self._rawlongitude}.items():
-            degs, mins, secs = ([float(fractions.Fraction(str(i)))
-                                  for i in j.values()[0:3]])
+            degs, mins, secs = ([float(fractions.Fraction(str(x)))
+                                  for x in j.values[0:3]])
             self._latlong[i] = degs + (mins / 60.0) + (secs / 3600.0)
 
 class PhotoGPS(object):
