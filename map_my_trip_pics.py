@@ -12,8 +12,10 @@ PIC_EXTS = ['.jpg', '.jpeg', '.png']
 
 class GPS(object):
     def __init__(self, tags):
-        self._latref = tags['GPS GPSLatitudeRef']
-        self._longref = tags['GPS GPSLongitudeRef']
+        self._refs = {'latitude':
+                        1 if str(tags['GPS GPSLatitudeRef']) == 'N' else -1,
+                      'longitude':
+                        1 if str(tags['GPS GPSLongitudeRef']) == 'E' else -1}
         self._rawlatitude = tags['GPS GPSLatitude']
         self._rawlongitude = tags['GPS GPSLongitude']
         self._latlong = collections.defaultdict(lambda: None)
@@ -31,10 +33,11 @@ class GPS(object):
         return self._latlong['latitude']
     def _compute(self):
         for i, j in {'latitude': self._rawlatitude,
-                  'longitude': self._rawlongitude}.items():
+                     'longitude': self._rawlongitude}.items():
             degs, mins, secs = ([float(fractions.Fraction(str(x)))
                                   for x in j.values[0:3]])
-            self._latlong[i] = degs + (mins / 60.0) + (secs / 3600.0)
+            sign = self._refs[i]
+            self._latlong[i] = sign*(degs+(mins/60.0)+(secs/3600.0))
 
 class PhotoGPS(object):
     ''' Class for finding and presenting GPS data in photos
