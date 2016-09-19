@@ -1,8 +1,18 @@
-require 'json'
-require 'uri'
-require 'net/http'
 require 'hue'
+require 'json'
+require 'net/http'
+require 'rufus-scheduler'
+require 'uri'
+require 'yaml'
 
+##
+# Integration between next Trimet arrival and an indicator light
+#
+# Requires a configuration file named .bus_light.yaml in the same directory,
+# which contains the following items:
+# trimet: a hash containing these elements
+#  api_key : a Trimet API key
+#  stopIDs : an array of Trimet stop IDs
 class BusLight
   Version = '0.0.1'
 
@@ -10,31 +20,87 @@ class BusLight
   # TRIMET_V1_STOPS_URL = "https://developer.trimet.org/ws/V1/arrivals"
   # See https://developer.trimet.org/ws_docs/arrivals2_ws.shtml
   TRIMET_STOPS_URL = "https://developer.trimet.org/ws/v2/arrivals"
-  TRIMET_API_KEY = "091253C02A8A508C8B7B9779E"
-  STOP_ID= "1818"
 
   def initialize(arguments, stdin)
+    configuration = YAML.load_file(File.join(__dir__, '.bus_light.yaml'))
+    @trimet_api_key = configuration['trimet']['api_key']
+    @trimet_stops = configuration['trimet']['stopIDs']
     @Client = Hue::Client.new
+    @light = @Client.lights[3]
+  end
+
+  ##
+  # Schedule the next time we should check for a bus
+  def schedule_next_check
+    # Start checking at 6:55 AM PDT for buses.
+    # If a bus is scheduled or estimated to arrive within the next 10 minutes, check again in 60 seconds
+    # If a bus is not scheduled or estimated to arrive within 15 minutes
+    #   Determine how far out the next bus is and check 15 minutes prior to estimate/schedule
+  end
+  
+  ##
+  # Check for a bus
+  #
+  def check_for_bus
+    uri = URI.parse( "#{TRIMET_STOPS_URL}?json=true&appID=#{@trimet_api_key}&locIDs=#{@trimet_stops.join(',')}" )
+    response = Net::HTTP.get_response(uri)
+    trimet_response =JSON.parse(response.body)
+    
+    next_arrival = trimet_response['resultSet']['arrival'][0]
+    scheduled = next_arrival['scheduled']
+    estimated = next_arrival['estimated']
+
+    unless scheduled.nil? && estimated.nil?
+      update_color ( [scheduled,estimated].compact.min - DateTime.now.strftime("%Q").to_i )
+    end
+
+  end
+
+  ##
+  # Update the lamp color based on the +BigNum+ milliseconds until the next bus arrival
+  #
+  # An ArgumentError is raised if the difference is negative or zero
+  def update_color soonest_bus
+    if soonest_bus < 0
+      raise ArgumentError.new('Soonest bus cannot be in zero or negative milliseconds')
+    end
+    if (soonest_bus >= 15 * 60 * 100) # if >= 15 minutes away, light off
+      @light.off!
+      puts "Off. no bus for at least fifteen minutes"
+    elsif (soonest_bus >= 10 * 60 * 100 && soonest_bus < 15 * 60 * 100) # 10-15 minutes away
+      @light.set_state( { :on => true, :xy => [0.4317,0.4996], :alert => "select" }, 50 ) # "yellow"
+      @light.on!
+      puts "yellow" 
+    elsif (soonest_bus >= 9 * 60 * 100 && soonest_bus < 10 * 60 * 100) # 9-10 minutes away
+      @light.set_state( { :on => true, :xy => [0.46 , 0.4], :alert => "select" }, 50 ) # "gold"
+      puts "gold"
+    elsif (soonest_bus >= 7 * 60 * 100 && soonest_bus < 9 * 60 * 100) # 7-9 minutes away
+      @light.set_state( { :on => true, :xy => [0.5113,0.4413] }, 50 ) # "goldenrod"
+      puts "goldenrod"
+    elsif (soonest_bus >= 5 * 60 * 100 && soonest_bus < 7 * 60 * 100 ) # 5-7 minutes away
+      @light.set_state( { :on => true, :xy => [0.5916,0.3824] }, 50 ) # "dark orange"
+      puts "dark orange"
+    elsif (soonest_bus >= 4 * 60 * 100 && soonest_bus < 5 * 60 * 100) # 4-5 minutes away
+      @light.set_state( { :on => true, :xy => [0.5562,0.4084], :alert => "select" }, 50 ) # "orange"
+      puts "orange"
+    elsif (soonest_bus >= 3 * 60 * 100 && soonest_bus < 4 * 60 * 100) # 3-4 minutes away
+      @light.set_state( { :on => true, :xy => [0.6733,0.3224], :alert => "select" }, 50 ) # "orange red" 
+      puts "orange red"
+    elsif (soonest_bus < 3 * 60 * 100) # less than 3 minutes away
+      @light.set_state( { :on => true, :xy => [0.674,0.322] }, 50) # "red"
+      puts "red"
+    end
   end
 
   def run
     # Get upcoming arrivals
-    uri = URI.parse( "#{TRIMET_STOPS_URL}?appID=#{TRIMET_API_KEY}&json=true&locIDs=#{STOP_ID}" )
-    puts uri
-    response = Net::HTTP.get_response(uri)
-    puts response.body
-    trimet_response = JSON.parse(response.body)
-    scheduled = trimet_response['resultSet']['arrival'][0]['scheduled']
-    estimated = trimet_response['resultSet']['arrival'][0]['estimated']
-    current = Time.new
-    if (scheduled - 600000 < time.strftime('%s').to_i * 1000) || (estimated - 600000 < time.strftime('%s').to_i * 1000)
-      puts "bus is arriving within ten minutes"
-      Client.lights[3].on!
-    end 
+    trimet_response = check_for_bus
 
   end
 
 end # end of class
 
-app = BusLight.new(ARGV, STDIN)
-app.run
+if __FILE__ == $0 then
+  app = BusLight.new(ARGV, STDIN)
+  app.run
+end
