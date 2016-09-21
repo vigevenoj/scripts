@@ -31,7 +31,7 @@ class BusLight
 
   ##
   # Schedule the next time we should check for a bus
-  def schedule_next_check
+  def schedule_next_check time_to_check
     # Start checking at 6:55 AM PDT for buses.
     # If a bus is scheduled or estimated to arrive within the next 10 minutes, check again in 60 seconds
     # If a bus is not scheduled or estimated to arrive within 15 minutes
@@ -50,8 +50,14 @@ class BusLight
     scheduled = next_arrival['scheduled']
     estimated = next_arrival['estimated']
 
-    unless scheduled.nil? && estimated.nil?
-      update_color ( [scheduled,estimated].compact.min - DateTime.now.strftime("%Q").to_i )
+    soonest = [scheduled,estimated].compact.min
+    now = DateTime.now.strftime("%Q")
+    puts "next bus at #{DateTime.strptime(soonest.to_s, '%Q')}"
+    puts "bus is #{(soonest.to_i - now.to_i)/1000} seconds away"
+
+
+    unless ((scheduled.nil? && estimated.nil?) || soonest <= 0)
+      update_color ( soonest - now.to_i)
     end
 
   end
@@ -64,31 +70,39 @@ class BusLight
     if soonest_bus < 0
       raise ArgumentError.new('Soonest bus cannot be in zero or negative milliseconds')
     end
-    if (soonest_bus >= 15 * 60 * 100) # if >= 15 minutes away, light off
+    if (soonest_bus >= 15 * 60 * 1000) # if >= 15 minutes away, light off
       @light.off!
       puts "Off. no bus for at least fifteen minutes"
-    elsif (soonest_bus >= 10 * 60 * 100 && soonest_bus < 15 * 60 * 100) # 10-15 minutes away
+      schedule_next_check(Time.now + (5*60))
+    elsif (soonest_bus >= 10 * 60 * 1000 && soonest_bus < 15 * 60 * 1000) # 10-15 minutes away
       @light.set_state( { :on => true, :xy => [0.4317,0.4996], :alert => "select" }, 50 ) # "yellow"
       @light.on!
-      puts "yellow" 
-    elsif (soonest_bus >= 9 * 60 * 100 && soonest_bus < 10 * 60 * 100) # 9-10 minutes away
+      puts "yellow"
+      schedule_next_check(Time.now + 60)
+    elsif (soonest_bus >= 9 * 60 * 1000 && soonest_bus < 10 * 60 * 1000) # 9-10 minutes away
       @light.set_state( { :on => true, :xy => [0.46 , 0.4], :alert => "select" }, 50 ) # "gold"
       puts "gold"
-    elsif (soonest_bus >= 7 * 60 * 100 && soonest_bus < 9 * 60 * 100) # 7-9 minutes away
+      schedule_next_check(Time.now + 60)
+    elsif (soonest_bus >= 7 * 60 * 1000 && soonest_bus < 9 * 60 * 1000) # 7-9 minutes away
       @light.set_state( { :on => true, :xy => [0.5113,0.4413] }, 50 ) # "goldenrod"
       puts "goldenrod"
-    elsif (soonest_bus >= 5 * 60 * 100 && soonest_bus < 7 * 60 * 100 ) # 5-7 minutes away
+      schedule_next_check(Time.now + 60)
+    elsif (soonest_bus >= 5 * 60 * 1000 && soonest_bus < 7 * 60 * 1000 ) # 5-7 minutes away
       @light.set_state( { :on => true, :xy => [0.5916,0.3824] }, 50 ) # "dark orange"
       puts "dark orange"
-    elsif (soonest_bus >= 4 * 60 * 100 && soonest_bus < 5 * 60 * 100) # 4-5 minutes away
+      schedule_next_check(Time.now + 60)
+    elsif (soonest_bus >= 4 * 60 * 1000 && soonest_bus < 5 * 60 * 1000) # 4-5 minutes away
       @light.set_state( { :on => true, :xy => [0.5562,0.4084], :alert => "select" }, 50 ) # "orange"
       puts "orange"
-    elsif (soonest_bus >= 3 * 60 * 100 && soonest_bus < 4 * 60 * 100) # 3-4 minutes away
+      schedule_next_check(Time.now + 60)
+    elsif (soonest_bus >= 3 * 60 * 1000 && soonest_bus < 4 * 60 * 1000) # 3-4 minutes away
       @light.set_state( { :on => true, :xy => [0.6733,0.3224], :alert => "select" }, 50 ) # "orange red" 
       puts "orange red"
-    elsif (soonest_bus < 3 * 60 * 100) # less than 3 minutes away
+      schedule_next_check(Time.now + 60)
+    elsif (soonest_bus < 3 * 60 * 1000) # less than 3 minutes away
       @light.set_state( { :on => true, :xy => [0.674,0.322] }, 50) # "red"
       puts "red"
+      schedule_next_check(Time.now + 60)
     end
   end
 
