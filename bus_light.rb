@@ -56,7 +56,7 @@ class BusLight
     puts "bus is #{(soonest.to_i - now.to_i)/1000} seconds away"
 
 
-    unless ((scheduled.nil? && estimated.nil?) || soonest <= 0)
+    unless (soonest - now.to_i) <= 0
       update_color ( soonest - now.to_i)
     end
 
