@@ -87,31 +87,31 @@ class BusLight
     elsif (soonest_bus >= 10 * 60 * 1000 && soonest_bus < 15 * 60 * 1000) # 10-15 minutes away
       @light.set_state( { :on => true, :xy => [0.4317,0.4996], :alert => "select" }, 50 ) # "yellow"
       @light.on!
-      puts "yellow"
+      puts "yellow (next bus in 10-15 minutes)" 
       schedule_next_check(Time.now + 60)
     elsif (soonest_bus >= 9 * 60 * 1000 && soonest_bus < 10 * 60 * 1000) # 9-10 minutes away
       @light.set_state( { :on => true, :xy => [0.46 , 0.4], :alert => "select" }, 50 ) # "gold"
-      puts "gold"
+      puts "gold (next bus in 9-10 minutes)"
       schedule_next_check(Time.now + 60)
     elsif (soonest_bus >= 7 * 60 * 1000 && soonest_bus < 9 * 60 * 1000) # 7-9 minutes away
       @light.set_state( { :on => true, :xy => [0.5113,0.4413] }, 50 ) # "goldenrod"
-      puts "goldenrod"
+      puts "goldenrod (next bus in 7-9 minutes)"
       schedule_next_check(Time.now + 60)
     elsif (soonest_bus >= 5 * 60 * 1000 && soonest_bus < 7 * 60 * 1000 ) # 5-7 minutes away
       @light.set_state( { :on => true, :xy => [0.5916,0.3824] }, 50 ) # "dark orange"
-      puts "dark orange"
+      puts "dark orange (next bus in 5-7 minutes)"
       schedule_next_check(Time.now + 60)
     elsif (soonest_bus >= 4 * 60 * 1000 && soonest_bus < 5 * 60 * 1000) # 4-5 minutes away
       @light.set_state( { :on => true, :xy => [0.5562,0.4084], :alert => "select" }, 50 ) # "orange"
-      puts "orange"
+      puts "orange (next bus in 4-5 minutes)"
       schedule_next_check(Time.now + 60)
     elsif (soonest_bus >= 3 * 60 * 1000 && soonest_bus < 4 * 60 * 1000) # 3-4 minutes away
       @light.set_state( { :on => true, :xy => [0.6733,0.3224], :alert => "select" }, 50 ) # "orange red" 
-      puts "orange red"
+      puts "orange red (next bus 3-4 minutes)"
       schedule_next_check(Time.now + 60)
     elsif (soonest_bus < 3 * 60 * 1000) # less than 3 minutes away
       @light.set_state( { :on => true, :xy => [0.674,0.322] }, 50) # "red"
-      puts "red"
+      puts "red (next bus in less than 3 minutes)"
       schedule_next_check(Time.now + 60)
     end
   end

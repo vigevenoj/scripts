@@ -44,12 +44,12 @@ end
 
 # main
 arrivals_info = get_arrivals
-prefix = 'urn:trimet:arrivals'
-fp = './/' + prefix
+prefix = 'xmlns' #'urn:trimet:arrivals'
+fp = ".//#{prefix}:"
 
 namespaces = arrivals_info.collect_namespaces
 
-arrivals_info.xpath('.//xmlns:location', namespaces).each do |node|
+arrivals_info.xpath("#{fp}location", namespaces).each do |node|
   if @stop_list.include?node.attr('locid')
     puts "#{node.attr('locid')} is in stop_list"
     stop_location = node.attr('desc')
@@ -60,8 +60,8 @@ arrivals_info.xpath('.//xmlns:location', namespaces).each do |node|
 
   isabus = false;
 
-  arrivals_info.xpath('.//xmlns:arrival', namespaces).each do |arrival|
-#    puts "checking #{arrival.attr('route')} in #{@route_list}"
+  arrivals_info.xpath("#{fp}arrival", namespaces).each do |arrival|
+    puts "checking #{arrival.attr('route')} in #{@route_list}"
     if @route_list.include?(arrival.attr('route').to_i)
       puts arrival.attr('fullSign')
       if arrival.attr('status') == 'estimated'
