@@ -27,11 +27,17 @@ class BusLight
     @trimet_stops = configuration['trimet']['stopIDs']
     @Client = Hue::Client.new
     @light = @Client.lights[3]
+    @sched = Rufus::Scheduler.new
   end
 
   ##
   # Schedule the next time we should check for a bus
   def schedule_next_check time_to_check
+    puts "Will check for bus at #{time_to_check}"
+    @sched.at time_to_check do
+      check_for_bus
+    end
+    @sched.join
     # Start checking at 6:55 AM PDT for buses.
     # If a bus is scheduled or estimated to arrive within the next 10 minutes, check again in 60 seconds
     # If a bus is not scheduled or estimated to arrive within 15 minutes
@@ -57,7 +63,11 @@ class BusLight
 
 
     unless (soonest - now.to_i) <= 0
-      update_color ( soonest - now.to_i)
+      begin
+        update_color ( soonest - now.to_i)
+      rescue ArgumentError => e
+        schedule_next_check(Time.now + 60)
+      end
     end
 
   end
@@ -115,6 +125,6 @@ class BusLight
 end # end of class
 
 if __FILE__ == $0 then
-  app = BusLight.new(ARGV, STDIN)
-  app.run
+  buslight = BusLight.new(ARGV, STDIN)
+  buslight.run
 end
