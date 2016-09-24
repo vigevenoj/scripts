@@ -15,6 +15,8 @@ require 'nokogiri'
 # 7787 (SW 6th & Pine, for Green)
 # 7782 (SW 6th & Oak, for 12)
 # 8402 (NW Everett & Park, for 77)
+# 2562 (SE 79th & Harold)
+# 1818 (SE Foster & 82nd)
 @stop_list  = [8333, 7787, 7782, 8402]
 
 # stop IDs can be comma-separated list (up to 10)
