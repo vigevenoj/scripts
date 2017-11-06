@@ -33,15 +33,15 @@ class BusLight
   ##
   # Schedule the next time we should check for a bus
   def schedule_next_check time_to_check
+    # TODO if time to check is not between 6:55 AM and 9:00 AM on a weekday, 
+    # TODO then schedule for 6:55 AM on the next weekday
+    puts "Is weekday? #{time_to_check.wday.between?(1,6)}"
+    puts "Is after 9:00 AM on weekday? #{time_to_check.hour.between?(6,9)}"
     puts "Will check for bus at #{time_to_check}"
     @sched.at time_to_check do
       check_for_bus
     end
     @sched.join
-    # Start checking at 6:55 AM PDT for buses.
-    # If a bus is scheduled or estimated to arrive within the next 10 minutes, check again in 60 seconds
-    # If a bus is not scheduled or estimated to arrive within 15 minutes
-    #   Determine how far out the next bus is and check 15 minutes prior to estimate/schedule
   end
   
   ##
@@ -116,15 +116,9 @@ class BusLight
     end
   end
 
-  def run
-    # Get upcoming arrivals
-    trimet_response = check_for_bus
-
-  end
-
 end # end of class
 
 if __FILE__ == $0 then
   buslight = BusLight.new(ARGV, STDIN)
-  buslight.run
+  buslight.check_for_bus
 end
