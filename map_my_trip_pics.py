@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 """
 Script to parse GPS location and time out of photos and
 return the data as json
@@ -8,7 +9,7 @@ import exifread
 import fractions
 import geojson
 # import imghdr
-import json
+# import json
 import logging
 import os
 import sys
@@ -94,6 +95,12 @@ class PhotoGPS(object):
                                       'path': self._path})
         return feature
 
+    def datetimestamp(self):
+        # date = self._tags['GPS GPSDate']
+        # convert time from array of [hh, mm, ss] in
+        # self._tags['GPS GPSTimeStamp'] # [hh, mm, ss] array
+        pass
+
     @property
     def latitude(self):
         if self._gps:
@@ -120,7 +127,6 @@ def main():
                         type=str)
     args = parser.parse_args()
 
-    gps_info_for_files = []
     collection = []
     if not os.path.isdir(args.source):
         sys.exit(args.source + " is not a directory")
@@ -132,12 +138,8 @@ def main():
             else:
                 continue
             gpsdata = PhotoGPS(abspath)
-            (gps_info_for_files.append(gpsdata.dict)
-                if gpsdata.dict
-                else False)
             if gpsdata.dict:
                 collection.append(gpsdata.as_geojson())
-    # print(json.dumps(gps_info_for_files))
     fc = geojson.FeatureCollection(collection)
     logger.warn(geojson.dumps(fc))
 
