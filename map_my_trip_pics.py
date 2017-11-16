@@ -6,6 +6,7 @@ return the data as json
 import argparse
 import collections
 import exifread
+import folium
 import fractions
 import geojson
 # import imghdr
@@ -142,6 +143,15 @@ def main():
                 collection.append(gpsdata.as_geojson())
     fc = geojson.FeatureCollection(collection)
     logger.warn(geojson.dumps(fc))
+
+    # use the first point in the trip to center a map
+    # geojson is [lng,lat] and folium is [lat,lng] so make sure to adjust
+    m = folium.Map(
+        location=[fc[0].geometry.coordinates[1], fc[0].geometry.coordinates[0]],
+    )
+    folium.GeoJson(fc).add_to(m)
+    m.save('index.html')
+
 
 if __name__ == '__main__':
     logger = logging.getLogger(__name__)
