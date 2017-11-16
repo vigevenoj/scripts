@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 """
 Script to parse GPS location and time out of photos and
-return the data as json
+generate a map of where the photos were taken
 """
 import argparse
 import collections
