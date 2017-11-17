@@ -89,7 +89,7 @@ class PhotoGPS(object):
     def as_geojson(self):
         """
         Return the photo as a geojson feature located at the GPS coordinates
-        and with the filename and path as properties
+        and with the filename, path, and timestamp as properties
         """
         point = geojson.Point((self.longitude, self.latitude))
         feature = geojson.Feature(geometry=point,
