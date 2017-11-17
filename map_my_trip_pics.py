@@ -62,6 +62,7 @@ class PhotoGPS(object):
         self._dict = {}
         self._gps = None
         self._tags = None
+        self._timestamp = None
 
     @property
     def tags(self):
@@ -77,6 +78,7 @@ class PhotoGPS(object):
             return self._dict
         try:
             self._dict = {'filename': self._path,
+                          'timestamp': self._timestamp,
                           'latitude': self.latitude,
                           'longitude': self.longitude}
         except (IOError, KeyError):
@@ -93,14 +95,17 @@ class PhotoGPS(object):
         feature = geojson.Feature(geometry=point,
                                   properties={
                                       'filename': self._path.split('/')[-1],
-                                      'path': self._path})
+                                      'path': self._path,
+                                      'timestamp': self.timestamp
+                                  })
         return feature
 
-    def datetimestamp(self):
-        # date = self._tags['GPS GPSDate']
-        # convert time from array of [hh, mm, ss] in
-        # self._tags['GPS GPSTimeStamp'] # [hh, mm, ss] array
-        pass
+    @property
+    def timestamp(self):
+        if self._timestamp:
+            return self._timestamp
+        self._timestamp = str(self._tags['EXIF DateTimeOriginal'])
+        return self._timestamp
 
     @property
     def latitude(self):
@@ -149,7 +154,16 @@ def main():
     m = folium.Map(
         location=[fc[0].geometry.coordinates[1], fc[0].geometry.coordinates[0]],
     )
-    folium.GeoJson(fc).add_to(m)
+    # iterate over all the points in the geojson and add a marker for each
+    for feature in fc.features:
+        popup_text = "{0}: {1}".format(feature.properties['timestamp'],
+                                       feature.properties['filename'])
+        folium.Marker(
+            [feature.geometry.coordinates[1], feature.geometry.coordinates[0]],
+            popup=popup_text
+        ).add_to(m)
+    # don't add the generated geojson as it doesn't have our marker popups
+    # folium.GeoJson(fc).add_to(m)
     m.save('index.html')
 
 
